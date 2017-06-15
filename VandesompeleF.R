@@ -1,54 +1,21 @@
 ##VandesompeleF.R ##
 
-# This function can be used to determin a set of reference/housekeeping (HK) genes for gene expression experiments using Andersen method. 
-
-# Libraries needed to run this program
-# 1. SLqPCR
-
 ##############################################
 ## Author Information ##
 
 # * Author: E.Frolli
 # * Orginization: Univeristy of Texas Marine Science Institute
 # * Contact: frolli.erin@utexas.edu
-# * Date: 06 June 2016
-
-
-##############################################
-## References ##
-
-# 1). Jo Vandesompele, Katleen De Preter, Filip Pattyn et al. (2002). Accurate normalization of real-time quantitative RT-PCR data 
-#     by geometric averaging of multiple internal control genes. Genome Biology 2002. 3(7):research0034.1-0034.11. 
-#     http://genomebiology.com/2002/3/7/research/0034/
-#
-# 2). Kohl, M., (2007). SLqPCR: Functions for analysis of real-time quantitative PCR data at SIRS-Lab GmbH. R package, SIRS-Lab GmbH.
-#     Jena.
-
-##############################################
-## Imputs into the function ##
-
-# * Data * : (n X m)  Matrix or data.frame containing raw QPCR expression values
-# * Factor * : (n X 1) Vector describing Zour samples. Can be strings or numbers that represent Zour group ID, tissue Type, or treatment ID.
-# * E * : (m X 1) vector of the real-time PCR efficiency values Defult = NULL. If value remanes NULL will replace with 2 or ~100% efficency. 
-# * GS * : (n X 1)  Vector containing gene symbols
-# * minHK * : (Integer) minimum number of HK genes that should be considered as best HK genes default = 2
-
-##############################################
-## Outputs of the function ##
-
-# * Rank.Table * : (n X m)  ranking of genes from best to worst where the minHK stable genes cannot be ranked so are ranked the same.
-# * Var.Table * : (n X m)  pairwise variation during stepwise selection
-# * meanM.Table * : (n X m)  average expression stability M
-
+# * Date: 14 June 2016
 
 ##############################################
 ## The Code ##
 
-VandesompeleF <-  function (Data, Factor=NULL,E=NULL,GS=NULL,minHK=2){
+VandesompeleF <-  function (qPCRData,minREF=2,Factor=NULL,E=NULL,GS=NULL){
   
   # Matrix vals
-  n = nrow(Data) # Number of rows = Samples    
-  L = ncol(Data) # Number of col = genes
+  n = nrow(qPCRData) # Number of rows = Samples    
+  L = ncol(qPCRData) # Number of col = genes
     
   ##############################################################
   # Warnings -  make sure that they have all the corect values
@@ -71,7 +38,7 @@ VandesompeleF <-  function (Data, Factor=NULL,E=NULL,GS=NULL,minHK=2){
   # Make sure to lable your genes.  
   if (is.null(GS)) {
     warning("No 'Gene Symbols' will defult to column names.")
-    GS = colnames(Data)
+    GS = colnames(qPCRData)
   }
     
   ##############################################################
@@ -84,10 +51,10 @@ VandesompeleF <-  function (Data, Factor=NULL,E=NULL,GS=NULL,minHK=2){
   FactorL = length(FactorNum) # total number of factors for dataset
   
   # Convert the data into relevence by gene/factor 
-  Data2 = Data # make a place holder for Data 2
+  qPCRData2 = qPCRData # make a place holder for qPCRData 2
   for(i in 1:length(FactorName)){ 
     for(ii in 1:length(E)){
-      Data2[Factor == FactorName[i],ii] <- RelativeQuant(Data[Factor == FactorName[i],ii], E = E[ii]) # Relevence function
+      qPCRData2[Factor == FactorName[i],ii] <- RelativeQuant(qPCRData[Factor == FactorName[i],ii], E = E[ii]) # Relevence function
     }
   }
   
@@ -98,7 +65,7 @@ VandesompeleF <-  function (Data, Factor=NULL,E=NULL,GS=NULL,minHK=2){
   
   # Run the Vandesompele method by factor
   for(i in 1:length(FactorName)){
-  M <- PairWiseComp(Data2[Factor == FactorName[i],], GS = GS, minHK = minHK)
+  M <- PairWiseComp(qPCRData2[Factor == FactorName[i],], GS = GS, minREF = minREF)
   RT = cbind(RT,M$Rank.Table) # Store all rankings into one table
   VT = cbind(VT,M$Var.Table)# Store all Variances into one table
   MT = cbind(MT,M$AvgStability.Table)# store all MeanM values into one table 

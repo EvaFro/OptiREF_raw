@@ -1,9 +1,7 @@
 ##PfafflF.R ##
-# This function can be used to determin a set of reference/housekeeping (HK) genes for gene expression experiments using Pfaffl method. 
 
 # Libraries needed to run this program
 # 1. Hmisc
-# 2. SLqPCR
 
 ##############################################
 ## Author Information ##
@@ -11,47 +9,12 @@
 # * Author: E.Frolli
 # * Orginization: Univeristy of Texas Marine Science Institute
 # * Contact: frolli.erin@utexas.edu
-# * Date: 06 June 2016
-
-##############################################
-## References ##
-
-# 1) Pfaffl, M. W., Tichopad, A., Prgomet, C., & Neuvians, T. P. (2004). Determination of stable housekeeping genes, differentially 
-#     regulated target genes and sample integrity: BestKeeper-Excel-based tool using pair-wise correlations. Biotechnology letters. 26(6): 509-515. 
-#
-
-
-##############################################
-## Imputs into the function ##
-
-# * Data * : (n X m)  Matrix or data.frame containing raw expression values
-# * TData * : (n X m)  Matrix or data.frame containing raw expression values of the Target Genes
-# * Factor * : (n X 1) Vector describing Zour samples. Can be strings or numbers that represent Zour group ID, tissue Type, or treatment ID.
-# * GS * : (n x m) Vector with gene symbol. 
-# * minHK * : (Integer) minimum number of HK genes that should be considered as best HK genes default = 2
-# * E * : (m X 1) vector of the real-time PCR efficiency values Defult = NULL.  Default will assume 100%  = 2. 
-# * TraceBack * : (logical)  print additional informaion default = TRUE
-
-##############################################
-## Outputs of the function ##
-
-# * HKG_SumStat * : (n X m)  sumery table for all the HKG's
-# * BKIn * : (n X 1)  BestKeeper index
-# * BK_SumStat * : (Numeric)  sumery table for all the HKG's including BestKeeper value
-# * HKG_r * : (n X m)  Persons Corrilation table for HKG's
-# * HKG_p * : (n X m)  P-Values for the Persons Corrilation table for HKG's
-
-# ** Only if have TG's **
-# * TG_SumStat * : (n X m)  sumery table for all the TG's including BestKeeper value
-# * TG_r * : (n X m)  Persons Corrilation table for TG's
-# * TG_p * : (n X m)  P-Values for the Persons Corrilation table for TG's
-
-
+# * Date: 14 June 2016
 
 ##############################################
 ## The Code ##
 
-PfafflF <-function (Data,TData = NULL,Factor=NULL,GS=NULL,minHK = 2,E = NULL,TraceBack = F){
+PfafflF <-function (qPCRData,TData = NULL,minREF=2,Factor=NULL,E=NULL,GS=NULL){
   
   
   ########################################## Stopped Here ##################################################
@@ -60,8 +23,8 @@ PfafflF <-function (Data,TData = NULL,Factor=NULL,GS=NULL,minHK = 2,E = NULL,Tra
   # Orginize the code to look similar to one another. 
   
   # Matrix vals
-  n = nrow(Data) # Number of rows = Samples    
-  L = ncol(Data) # Number of col = genes
+  n = nrow(qPCRData) # Number of rows = Samples    
+  L = ncol(qPCRData) # Number of col = genes
   
   # Define the factor 
   FactorNum = as.numeric(summary.factor(Factor)) # total number of samples for each factor
@@ -89,7 +52,7 @@ PfafflF <-function (Data,TData = NULL,Factor=NULL,GS=NULL,minHK = 2,E = NULL,Tra
   # Make sure to lable your genes.  
   if (is.null(GS)) {
     warning("No 'Gene Symbols' will defult to column names.")
-    GS = colnames(Data)
+    GS = colnames(qPCRData)
   }
   
   if (min(FactorNum)<5) {
@@ -109,7 +72,7 @@ PfafflF <-function (Data,TData = NULL,Factor=NULL,GS=NULL,minHK = 2,E = NULL,Tra
   
   # Run the Vandesompele method by factor
   for(i in 1:FactorL){
-    M <- BKStability(Data[Factor == FactorName[i],],E=E,GS=GS,minHK = minHK,trace=TraceBack)
+    M <- BKStability(qPCRData[Factor == FactorName[i],],E=E,GS=GS,minREF = minREF,trace=TraceBack)
     VT = cbind(VT,M$AvgVar.Table)# Store all Variances into one table
     RC = nrow(M$Cor.Table)
     if(i==1){
@@ -163,6 +126,4 @@ PfafflF <-function (Data,TData = NULL,Factor=NULL,GS=NULL,minHK = 2,E = NULL,Tra
 
 }
 
-############################## Stopped Here!! ######################################
-# Create a comparison table after. 
 
