@@ -52,7 +52,7 @@ OptiREF <-function (qPCRData,TData = NULL, method = NULL, minREF = 2, Factor=NUL
   # Are there Gene Symbol names - collumn names. 
   if (is.null(colnames(qPCRData))) 
     stop("'qPCRData' needs column names aka 'Gene Symbol' ")
-    GS = colnames(qPCRData)
+    GeneSymbol = colnames(qPCRData)
   
   # have they choosen a which method to run
   if(is.null(method)) 
@@ -72,7 +72,7 @@ OptiREF <-function (qPCRData,TData = NULL, method = NULL, minREF = 2, Factor=NUL
   
   
   ##############################################################
-  # Methods
+  # Main Function 
   ##############################################################
     
   ##################################################################################################################################
@@ -81,7 +81,7 @@ OptiREF <-function (qPCRData,TData = NULL, method = NULL, minREF = 2, Factor=NUL
   if (method == 1) { 
     
     # will use the selectHKgenes code from the package SLqPCR
-    M1 <- VandesompeleF(qPCRData,minREF,Factor,E,GS)
+    M1 <- VandesompeleF(qPCRData,minREF,Factor,E,GeneSymbol)
     
     # return values
     return(M1)
@@ -93,7 +93,7 @@ OptiREF <-function (qPCRData,TData = NULL, method = NULL, minREF = 2, Factor=NUL
   if (method == 2) {
     
     # will use the PfafflF code for the second method
-    M2 <- PfafflF(qPCRData,TData,minREF,Factor,E,GS)
+    M2 <- PfafflF(qPCRData,TData,minREF,Factor,E,GeneSymbol)
     
     # return values
     return(M2)
@@ -106,7 +106,7 @@ OptiREF <-function (qPCRData,TData = NULL, method = NULL, minREF = 2, Factor=NUL
   if (method == 3) {
     
     # will use the AndersenF code for the second method
-    M3 <- AndersenF(qPCRData,minREF,Factor,E,GS)
+    M3 <- AndersenF(qPCRData,minREF,Factor,E,GeneSymbol)
     
     # return values
     return(M3)
@@ -120,11 +120,11 @@ OptiREF <-function (qPCRData,TData = NULL, method = NULL, minREF = 2, Factor=NUL
     # if (method == 4) {
   #     
   #   # will use the all three methods to compare the top HK gene. 
-  #   M3 <- AndersenF(qPCRData,minREF,Factor,E,GS)
+  #   M3 <- AndersenF(qPCRData,minREF,Factor,E,GeneSymbol)
   #     
-  #   M2 <- PfafflF(qPCRData,TData,minREF,Factor,E,GS)
+  #   M2 <- PfafflF(qPCRData,TData,minREF,Factor,E,GeneSymbol)
   #     
-  #   M1 <- VandesompeleF(qPCRData,,minREF,Factor,E,GS)
+  #   M1 <- VandesompeleF(qPCRData,,minREF,Factor,E,GeneSymbol)
   #     
   # }
   #   

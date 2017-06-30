@@ -1,39 +1,21 @@
 ## InVar.R ##
 
-# This function calculates the Interinsic Variance of expression.
-
-
 ##############################################
 ## Author Information ##
 
 # * Author: E.Frolli
 # * Orginization: Univeristy of Texas Marine Science Institute
 # * Contact: frolli.erin@utexas.edu
-# * Date: 12 Feb 2016
-
-
-##############################################
-## Imputs into the function ##
-
-# * x * : (n X m)  non-nagative real-time PCR values
-# * E * : (m X 1) vector of the real-time PCR efficiency values Defult = NULL. Meaning if do not supply a E vector will defult this value to 2.
-
-
-##############################################
-## Outputs of the function ##
-
-# * InVar * : (n x 1) Interinsic Variance of expression.
-# * InVar_per * : (n x 1) Interinsic Variance of percent expression.
-# * InVar_Xfold * : (n x 1)  Efficiency corrected Interinsic Variance of x-fold.
+# * Date: 28 Jun 2017
 
 ##############################################
 ## The Code ##
 
-InVar <- function (x,E=NULL){
+InVar <- function (qPCRData,E=NULL){
 
     
-    n = nrow(x) # Number of rows    
-    L = ncol(x) # Number of col
+    n = nrow(qPCRData) # Number of rows    
+    L = ncol(qPCRData) # Number of col
     
     # Defult E values 
     if(is.null(E)){
@@ -42,9 +24,9 @@ InVar <- function (x,E=NULL){
     
   
     # create the Geometric mean vector
-    GM = c()
+    GeoMean = c()
     for (i in 1:L){
-      GM[i] = round(GeomMean(x[,i]),digits =2)
+      GeoMean[i] = round(GeomMean(qPCRData[,i]),digits =2)
     }
     
     # create the InVar vectors
@@ -53,8 +35,8 @@ InVar <- function (x,E=NULL){
     diff.G_Xfold = matrix(0,nrow=n,ncol=L)
     for(i in 1:n){
       for(ii in 1:L){
-        diff.G[i,ii] = x[i,ii] - GM[ii]
-        perdiff.G[i,ii] = (x[i,ii]/GM[ii]-1)*100
+        diff.G[i,ii] = qPCRData[i,ii] - GeoMean[ii]
+        perdiff.G[i,ii] = (qPCRData[i,ii]/GeoMean[ii]-1)*100
         diff.G_Xfold[i,ii] = round( E[ii]^diff.G[i,ii],digits =2)
       }
     }

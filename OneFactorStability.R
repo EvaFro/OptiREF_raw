@@ -1,6 +1,4 @@
 ##OneFactorStability.R ##
-# This function calculates the stability value for a single factor of values. 
-
 
 ##############################################
 ## Author Information ##
@@ -8,53 +6,34 @@
 # * Author: E.Frolli
 # * Orginization: Univeristy of Texas Marine Science Institute
 # * Contact: frolli.erin@utexas.edu
-# * Date: 12 May 2016
+# * Date: 30 Jun 2017
 
-##############################################
-## References ##
-
-# 1) Andersen, C. L., Jensen, J. L., & Ørntoft, T. F. (2004). Normalization of real-time quantitative reverse transcription-PCR data: 
-#     a model-based variance estimation approach to identify genes suited for normalization, applied to bladder and colon cancer data sets. 
-#     Cancer research. 64(15): 5245-5250.
-# 
-
-
-
-##############################################
-## Imputs into the function ##
-
-# * Data * : (n X m)  Matrix or data.frame containing relative expression values raw expression values
-
-##############################################
-## Outputs of the function ##
-
-# * Q2ig * : (n X m)  Stability Variation by gene 
 
 ##############################################
 ## The Code ##
 
-OneFactorStability <-function(Data) {
+OneFactorStability <-function(qPCRData) {
   
   # Matrix vals
-  n = nrow(Data) # Number of rows aka # of Samples   
-  L = ncol(Data) # Number of col aka # of Genes
-  GeneNames = colnames(Data)
+  n = nrow(qPCRData) # Number of rows aka # of Samples   
+  L = ncol(qPCRData) # Number of col aka # of Genes
+  GeneNames = colnames(qPCRData)
   
 
   #Sample Averages  
-  Y.ng = apply(Data,1,mean) # average of each sample
+  Y.ng = apply(qPCRData,1,mean) # average of each sample
   
   # Gene Averages
-  Y.ig = apply(Data,2,mean) 
+  Y.ig = apply(qPCRData,2,mean) 
   
   # Total Average
-  Y.g= mean(Data)
+  Y.g= mean(qPCRData)
   
   # Sample Variances 
   # first we calculate Rigj = Yigj -Yig. -Y.gj + Y.g. Modified version of Equation 1.2 in sumplemental material for Andersen et al.
   Ring = matrix(0,n,L)
   
-  R1 = Data - Y.ng # Subtract like values (ie by sample: Ying-Y.ng)
+  R1 = qPCRData - Y.ng # Subtract like values (ie by sample: Ying-Y.ng)
   R2 = - Y.ig + Y.g # Add like values (ie by factor: -Yig +Y.g)
     
   # Combine all together to calculate Ring

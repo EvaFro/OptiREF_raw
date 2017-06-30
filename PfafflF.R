@@ -14,7 +14,7 @@
 ##############################################
 ## The Code ##
 
-PfafflF <-function (qPCRData,TData = NULL,minREF=2,Factor=NULL,E=NULL,GS=NULL){
+PfafflF <-function (qPCRData,TData = NULL,minREF=2,Factor=NULL,E=NULL,GeneSymbol=NULL){
   
   
   ########################################## Stopped Here ##################################################
@@ -50,9 +50,9 @@ PfafflF <-function (qPCRData,TData = NULL,minREF=2,Factor=NULL,E=NULL,GS=NULL){
   
   # Gene Symbols
   # Make sure to lable your genes.  
-  if (is.null(GS)) {
+  if (is.null(GeneSymbol)) {
     warning("No 'Gene Symbols' will defult to column names.")
-    GS = colnames(qPCRData)
+    GeneSymbol = colnames(qPCRData)
   }
   
   if (min(FactorNum)<5) {
@@ -60,7 +60,7 @@ PfafflF <-function (qPCRData,TData = NULL,minREF=2,Factor=NULL,E=NULL,GS=NULL){
   }
   
   ##############################################################
-  # Methods
+  # Main Function 
   ##############################################################
 
   
@@ -72,7 +72,7 @@ PfafflF <-function (qPCRData,TData = NULL,minREF=2,Factor=NULL,E=NULL,GS=NULL){
   
   # Run the Vandesompele method by factor
   for(i in 1:FactorL){
-    M <- BKStability(qPCRData[Factor == FactorName[i],],E=E,GS=GS,minREF = minREF,trace=TraceBack)
+    M <- BKStability(qPCRData[Factor == FactorName[i],],E=E,GeneSymbol=GeneSymbol,minREF = minREF,trace=TraceBack)
     VT = cbind(VT,M$AvgVar.Table)# Store all Variances into one table
     RC = nrow(M$Cor.Table)
     if(i==1){

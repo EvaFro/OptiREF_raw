@@ -1,6 +1,4 @@
 ## PairWiseComp.R ##
-# This function calculates the Pair-Wise Comparison of reference genes.
-
 
 ##############################################
 ## Author Information ##
@@ -11,41 +9,21 @@
 # * Date: 13 May 2017
 
 ##############################################
-## References ##
-
-# 1). Jo Vandesompele, Katleen De Preter, Filip Pattyn et al. (2002). Accurate normalization of real-time quantitative RT-PCR data 
-#     by geometric averaging of multiple internal control genes. Genome Biology 2002. 3(7):research0034.1-0034.11. 
-#     http://genomebiology.com/2002/3/7/research/0034/
-
-
-##############################################
-## Imputs into the function ##
-
-# * Data * : (n X m)  Matrix or data.frame containing raw QPCR expression values
-# * GS * : (n X 1)  Vector containing gene symbols
-# * minHK * : (Integer) minimum number of HK genes that should be considered as best HK genes default = 2
-
-##############################################
-## Outputs of the function ##
-
-# * M1 * : (n X m)  Combind Rank, Variance and Stability into one Table 
-
-##############################################
 ## The Code ##
 
-PairWiseComp <-function(Data,GS=NULL,minHK=2) {
+PairWiseComp <-function(qPCRData,minREF=2,GeneSymbol=NULL) {
   
   
   ##############################################################
   # Warnings -  make sure that they have all the corect values
   ##############################################################
  
-  n <- ncol(Data)
-  if (n <= 1) {stop("Two genes are needed for this method")}
+  n <- ncol(qPCRData)
+  if (n <= 1) {stop("At least two genes are needed for this method")}
   
   
   ##############################################################
-  # Methods
+  # Main Function 
   ##############################################################
   # Create the pairwise variation 
   Var.N = rep("",n)
@@ -54,36 +32,36 @@ PairWiseComp <-function(Data,GS=NULL,minHK=2) {
   Rank.Table = rep("",n) # Create a blank Rank Table vector
   
   # Pair-Wise Comparison
-  for(i in n:minHK){
-    Mj = StabilityM(Data) # Calculate the Stability values for each gene
+  for(i in n:minREF){
+    Mj = StabilityM(qPCRData) # Calculate the Stability values for each gene
     AvgStability.Table[i] = mean(Mj) # Create the average stability gene Equation 4 in sumplemental material for Vandesompele et al.
     index = which.max(Mj) # Which has the hiest value (we are going to remove)
-    Rank.Table[i] = GS[index] # Has the lowest ranking
+    Rank.Table[i] = GeneSymbol[index] # Has the lowest ranking
     
-    # Create the geometric mean between the original Data and with the least stable gene removed
-    if (i > minHK) {
-      GM.old <- apply(Data, 1, GeomMean)
-      GM.new <- apply(Data[, -index], 1, GeomMean)
+    # Create the geometric mean between the original qPCRData and with the least stable gene removed
+    if (i > minREF) {
+      GM.old <- apply(qPCRData, 1, GeomMean)
+      GM.new <- apply(qPCRData[, -index], 1, GeomMean)
       Var.Table[i] <- sd(log2(GM.new/GM.old), na.rm = TRUE) # Equation 3 in sumplemental material for Vandesompele et al.
     }else {
-      Rank.Table[1:minHK] = GS # fill in the remaining rank table at the end.
-      }
+      Rank.Table[1:minREF] = GeneSymbol # fill in the remaining rank table at the end.
+    }
     
     # Cut out the lowest ranking gene for next iteration
     Var.N[i] = paste(i-1,"/",i,sep = "")
-    Data <- Data[, -index]
-    GS <- GS[-index]
+    qPCRData <- qPCRData[, -index]
+    GeneSymbol <- GeneSymbol[-index]
     
   }
   
   # Remove unwanted spaces in each table and label
   AvgStability.Table = rev(AvgStability.Table[-1])
-  names(AvgStability.Table) = n:minHK
+  names(AvgStability.Table) = n:minREF
   Var.Table = rev(Var.Table[-c(1:2)])
   Var.N = rev(Var.N[-c(1:2)])
   names(Var.Table) = Var.N
   Rank.N = 1:n
-  Rank.N[1:minHK] = 1
+  Rank.N[1:minREF] = 1
   names(Rank.Table) = Rank.N
   
   

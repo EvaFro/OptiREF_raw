@@ -1,7 +1,5 @@
 ## BKSumStats.R ##
 
-# This function calculates the summery statistics of any given dataset
-
 
 ##############################################
 ## Author Information ##
@@ -9,29 +7,16 @@
 # * Author: E.Frolli
 # * Orginization: Univeristy of Texas Marine Science Institute
 # * Contact: frolli.erin@utexas.edu
-# * Date: 12 Feb 2016
-
-
-##############################################
-## Imputs into the function ##
-
-# * Data * : (n X m)  Matrix of raw real-time PCR values
-# * E * : (m X 1) vector of the real-time PCR efficiency values Defult = NULL. Meaning if do not supply a E vector will defult this value to 2.
-
-##############################################
-## Outputs of the function ##
-
-# * AvDev * : (numeric)  Average Deviation of x
-
+# * Date: 23 Jun 2017
 
 ##############################################
 ## The Code ##
 
-BKSumStats <-function (Data,E=NULL){
+BKSumStats <-function (qPCRData,E=NULL){
     
 
-    n = nrow(Data) # Number of rows    
-    L = ncol(Data) # Number of col
+    n = nrow(qPCRData) # Number of rows    
+    L = ncol(qPCRData) # Number of col
     
     # Defult E values 
     if(length(E) < 1){
@@ -41,41 +26,41 @@ BKSumStats <-function (Data,E=NULL){
     N = rep(n,L) # create the sample size vector
     
     # create the Geometric mean vector
-    GM = round(apply(Data,2,GeomMean),digits =2)
+    GeometricMean = round(apply(qPCRData,2,GeomMean),digits =2)
     
     # create the Arithmatic mean vector
-    AM=round(apply(Data,2,mean),digits =2)
+    ArithmaticMean=round(apply(qPCRData,2,mean),digits =2)
     
     # create the Minimum value vector
-    Min = round(apply(Data,2,min),digits =2)
+    Min = round(apply(qPCRData,2,min),digits =2)
     
     # create the Maximum value vector
-    Max = round(apply(Data,2,max),digits =2)
+    Max = round(apply(qPCRData,2,max),digits =2)
 
     # create the Average Deviation vector
-    AvDev = round(apply(Data,2,AvrgDev),digits =2)
+    AvDev = round(apply(qPCRData,2,AvrgDev),digits =2) 
+    # Note use the Average Deviation after realize thats the value they used to create the "Standard Deviation" in there Table 1 in Pfaffl et al.,  this was also confermed by the BestKeeper Excel tool. 
     
     # create the coefficient of varience vector
-    CV = round((AvDev/AM*100),digits = 2)
+    CoVar = round((AvDev/AM*100),digits = 2)
     
     # create the Minimum extream values of expression levels vector
     Min2 = Min-GM
-    Min_Xfold = round(PowerF(E,Min2),digits=2)
+    Min_Xfold = round(PowerF(E,Min2),digits=2) # Equation 1 in Pfaffl et al.
     
-    # create the Minimum extream values of expression levels vector
+    # create the Maximum extream values of expression levels vector
     Max2 = Max-GM
-    Max_Xfold = round(PowerF(E,Max2),digits=2)
+    Max_Xfold = round(PowerF(E,Max2),digits=2) # Equation 2 in Pfaffl et al.
     
     # create the Sandard Deviation of the absolute regulation coefficients vector
-    AvDev_Xfold = round(PowerF(E,AvDev),digits=2)
+    AvDev_Xfold = round(PowerF(E,AvDev),digits=2)  # In Table 1 and assumed to be equivilant to Equation 1 & 2 in Pfaffl et al.
     
     # Combin all vectors into a Descriptive Statistics Table
-    SumStat = rbind(N,GM,AM,Min,Max,AvDev,CV,Min_Xfold,Max_Xfold,AvDev_Xfold)
-    colnames(SumStat) <- colnames(Data)
+    SumStat = rbind(N,GeometricMean,ArithmaticMean,Min,Max,AvDev,CoVar,Min_Xfold,Max_Xfold,AvDev_Xfold)
+    colnames(SumStat) <- colnames(qPCRData)
     
-  
     
-    # return Data
+    # return qPCRData
     return(SumStat) 
     
   }

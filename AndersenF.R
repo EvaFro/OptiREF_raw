@@ -12,7 +12,7 @@
 ##############################################
 ## The Code ##
 
-AndersenF <- function(qPCRData,minREF=2,Factor=NULL,E=NULL,GS=NULL){
+AndersenF <- function(qPCRData,minREF=2,Factor=NULL,E=NULL,GeneSymbol=NULL){
 
   # Matrix vals
   n = nrow(qPCRData) # Number of rows = Samples    
@@ -32,13 +32,13 @@ AndersenF <- function(qPCRData,minREF=2,Factor=NULL,E=NULL,GS=NULL){
 
   # Gene Symbols
   # Make sure to lable your genes.  
-  if (is.null(GS)) {
+  if (is.null(GeneSymbol)) {
     warning("No 'Gene Symbols' will defult to column names.")
-    GS = colnames(qPCRData)
+    GeneSymbol = colnames(qPCRData)
   }
   
   ##############################################################
-  # Methods
+  # Main Function 
   ##############################################################
   # Transform data by using standard curve efficiency values defult ~100%
   # qPCRData = StandCurv(qPCRData,E)
@@ -48,7 +48,7 @@ AndersenF <- function(qPCRData,minREF=2,Factor=NULL,E=NULL,GS=NULL){
   
   # Convert data into a matrix
   qPCRData=matrix(as.numeric(unlist(qPCRData)),n,L)
-  colnames(qPCRData)=GS
+  colnames(qPCRData)=GeneSymbol
 
 
   
@@ -58,10 +58,10 @@ AndersenF <- function(qPCRData,minREF=2,Factor=NULL,E=NULL,GS=NULL){
     
   }else{
     # Do the other methods for Facors
-    IntraVar = IntraGroupVar(qPCRData,Factor)
-    InterVar= InterGroupVar(qPCRData,Factor)
-    Stability = StabilityValue(GS,IntraVar$Q2ig_ng,InterVar$dig)
-    AverageStability = AvrgControlGene(GS,Factor,minREF,IntraVar$Q2ig_ng,InterVar$dig,Stability$Y2,Stability$RankOrder[1:5])
+    IntraVar = IntraFactorVar(qPCRData,Factor)
+    InterVar= InterFactorVar(qPCRData,Factor)
+    Stability = StabilityValue(GeneSymbol,IntraVar$Q2ig_ng,InterVar$dig)
+    AverageStability = AvrgControlGene(Factor,GeneSymbol,minREF,IntraVar$Q2ig_ng,InterVar$dig,Stability$Y2,Stability$RankOrder[1:5])
     M3 = Stability$M3
     M3$AvrControl = AverageStability
   }

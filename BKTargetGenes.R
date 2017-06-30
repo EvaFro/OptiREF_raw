@@ -32,10 +32,6 @@ BKTargetGenes <-function (TData,BKIn){
 
     require(Hmisc) # To run the corilation values
     
-    ##############################################################
-    # Methods
-    ##############################################################
-    
     
     # Calc the Descriptive Statistics of target genes
     TD_SumStat = BKSumStats(TData)

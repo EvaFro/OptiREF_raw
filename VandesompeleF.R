@@ -11,7 +11,7 @@
 ##############################################
 ## The Code ##
 
-VandesompeleF <-  function (qPCRData,minREF=2,Factor=NULL,E=NULL,GS=NULL){
+VandesompeleF <-  function (qPCRData,minREF=2,Factor=NULL,E=NULL,GeneSymbol=NULL){
   
   # Matrix vals
   n = nrow(qPCRData) # Number of rows = Samples    
@@ -36,13 +36,13 @@ VandesompeleF <-  function (qPCRData,minREF=2,Factor=NULL,E=NULL,GS=NULL){
   
   # Gene Symbols
   # Make sure to lable your genes.  
-  if (is.null(GS)) {
+  if (is.null(GeneSymbol)) {
     warning("No 'Gene Symbols' will defult to column names.")
-    GS = colnames(qPCRData)
+    GeneSymbol = colnames(qPCRData)
   }
     
   ##############################################################
-  # Methods
+  # Main Function 
   ##############################################################
   
   # Define the factor 
@@ -65,7 +65,7 @@ VandesompeleF <-  function (qPCRData,minREF=2,Factor=NULL,E=NULL,GS=NULL){
   
   # Run the Vandesompele method by factor
   for(i in 1:length(FactorName)){
-  M <- PairWiseComp(qPCRData2[Factor == FactorName[i],], GS = GS, minREF = minREF)
+  M <- PairWiseComp(qPCRData2[Factor == FactorName[i],], GeneSymbol = GeneSymbol, minREF = minREF)
   RT = cbind(RT,M$Rank.Table) # Store all rankings into one table
   VT = cbind(VT,M$Var.Table)# Store all Variances into one table
   MT = cbind(MT,M$AvgStability.Table)# store all MeanM values into one table 
