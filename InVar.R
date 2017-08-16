@@ -52,7 +52,7 @@ InVar <- function (qPCRData,E=NULL){
    
     
 
-    InVars <- list("InVar" = InVar,"InVar_per" =perInVar,"InVar_Xfold"=InVar_Xfold)
+    InVars <- list("InVar" = InVar,"InVar_per" = perInVar,"InVar_Xfold" = InVar_Xfold)
     
     # return Data
     return(InVars) 

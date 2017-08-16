@@ -20,7 +20,7 @@ StabilityM <-function(qPCRData) {
   ##############################################################
  
   n <- ncol(qPCRData)
-  if (n <= 1) {stop("Two genes are needed for this method")}
+  if (n <= 1) {stop("At least two genes are needed for this method")}
   
   
   ##############################################################

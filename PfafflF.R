@@ -14,22 +14,15 @@
 ##############################################
 ## The Code ##
 
-PfafflF <-function (qPCRData,TData = NULL,minREF=2,Factor=NULL,E=NULL,GeneSymbol=NULL){
+PfafflF <-function (qPCRData,TargetData=NULL,minREF=2,Category=NULL,E=NULL,TargetE=NULL){
   
-  
-  ########################################## Stopped Here ##################################################
-  # Need to transform the data
-  # Need to figure out how to make it work for both factor and un factor.
-  # Orginize the code to look similar to one another. 
   
   # Matrix vals
+  
   n = nrow(qPCRData) # Number of rows = Samples    
   L = ncol(qPCRData) # Number of col = genes
-  
-  # Define the factor 
-  FactorNum = as.numeric(summary.factor(Factor)) # total number of samples for each factor
-  FactorName = levels(Factor) # unique factor names
-  FactorL = length(FactorNum) # total number of factors for dataset
+
+   
   
   ##############################################################
   # Warnings -  make sure that they have all the corect values
@@ -41,87 +34,125 @@ PfafflF <-function (qPCRData,TData = NULL,minREF=2,Factor=NULL,E=NULL,GeneSymbol
     E = rep(2,L)
   }
   
-  # Factor info
-  # If no Factor Value - make all one Factor on a gene by gene basis. 
-  if (is.null(Factor)) {
-    warning("No 'Factor' will only compare gene by gene.")
-    Factor <- FactorF("ByGene",L)
+  if(!is.null(TargetData)){
+    m = nrow(TargetData) # Number of rows = samples target Genes
+    K = ncol(TargetData) # Number of col = target gene
+    if (is.null(TargetE)){
+      warning("No 'TargetE' values for each gene. Will set Defalt to 2 or Effiency = ~ 100%.")
+      TargetE = rep(2,(K+1))
+    }
+  }
+  
+  # Category info
+  # If no Category Value - make all one Category on a gene by gene basis. 
+  if (is.null(Category)) {
+    warning("No 'Category' will only compare gene by gene.")
+    Category <- CategoryF("ByGene",n)
   }
   
   # Gene Symbols
-  # Make sure to lable your genes.  
-  if (is.null(GeneSymbol)) {
-    warning("No 'Gene Symbols' will defult to column names.")
-    GeneSymbol = colnames(qPCRData)
+  # Are there Gene Symbol names - collumn names. 
+  if (is.null(colnames(qPCRData))){ 
+    stop("'qPCRData' needs column names aka 'Gene Symbol' ")
+  }
+  GeneSymbol = colnames(qPCRData)
+  
+  # Define the Category 
+  CategoryNum = as.numeric(summary.factor(Category)) # total number of samples for each Category
+  CategoryName = levels(Category) # unique Category names
+  CategoryL = length(CategoryNum) # total number of Categorys for dataset
+  
+  #Check to see if have enough for the persons correlation
+  if (min(CategoryNum)<5) {
+    stop("You need at least 5 samples per Category to run Category comparisons with the Pfaffl method.")
   }
   
-  if (min(FactorNum)<5) {
-    stop("You need at least 5 samples per factor to run factor comparisons with the Pfaffl method.")
-  }
-  
+
   ##############################################################
   # Main Function 
   ##############################################################
-
   
-  # Set up the seporate tables (Rank, Variance, and MeanM)
+  # Set up the seporate tables (Rank, Variance, and Corilation, Target Gene Corilation)
   RT = c()
   VT = c()
   CT = c()
+  PT = c()
+  SST = c()
+  ST = c()
+  BT = c()
   TGCT = c()
+  TGPT = c()
+  TGSST = c()
   
-  # Run the Vandesompele method by factor
-  for(i in 1:FactorL){
-    M <- BKStability(qPCRData[Factor == FactorName[i],],E=E,GeneSymbol=GeneSymbol,minREF = minREF,trace=TraceBack)
-    VT = cbind(VT,M$AvgVar.Table)# Store all Variances into one table
-    RC = nrow(M$Cor.Table)
-    if(i==1){
-      CT = M$Cor.Table
-      FactorN=rep(FactorName[i],RC)
-      RT = M$Rank.Table
-    }else{
-    CT = rbind(CT,M$Cor.Table)# store all MeanM values into one table 
-    FactorN = c(FactorN,rep(FactorName[i],RC))
+  # Run the Pfaffl method by Category
+  for(i in 1:CategoryL){
+    M <- BKStability(qPCRData[Category == CategoryName[i],],E=E,minREF = minREF)
+    VT = cbind(VT,M$Var.Table)# Store all Variances into one table
     RT = cbind(RT,M$Rank.Table) # Store all rankings into one table
+    ST = cbind(ST,M$Stability) # Store all AvgStabilites into one table
+    BT = c(BT,list(M$BestKeeper.Table))# store all MeanM values into one table 
+    CT = c(CT,list(M$Cor.Table))# store all MeanM values into one table 
+    PT = c(PT,list(M$PVal.Table))# store all MeanM values into one table 
+    SST = c(SST,list(M$SummeryStats.Table))
+
+    # If data has target genes
+    if(!is.null(TargetData)){
+      TGM = TargetGenes(TargetData[Category == CategoryName[i],],M$BestKeeper.Table$BestKeeper.Inx,E=TargetE)
+      TGCT = c(TGCT,list(TGM$TG.Cor.Table))# store all MeanM values into one table 
+      TGPT = c(TGPT,list(TGM$TG.PVal.Table))# store all MeanM values into one table 
+      TGSST = c(TGSST,list(TGM$TG.SummeryStats.Table))
     }
-    
-    if(!is.null(TData)){      
-      TGM = BKTargetGenes(TData[Factor == FactorName[i],],M$BKIn)
-      TRC = nrow(TGM$Cor.Table)
-      if(i==1){
-        TGCT = TGM$Cor.Table
-        TFactorN=rep(FactorName[i],TRC)
-      }else{
-        TGCT = rbind(TGCT,TGM$Cor.Table)# store all MeanM values into one table 
-        TFactorN = c(TFactorN,rep(FactorName[i],TRC))
-      }
-    }      
   }
-  
-  # Put the name of each factor as the columns
-  colnames(RT) = FactorName
-  colnames(VT) = FactorName
-  CT = cbind(CT,FactorN)
-  
-  
- # Combine all tables into one data frame
-  M2 = c()
-  M2$Rank.Table = RT 
-  M2$Var.Table = VT
-  M2$Cor.Table = CT
+
+  # Put the name of each Category as the columns
+  colnames(RT) = CategoryName
+  colnames(VT) = CategoryName
+  colnames(ST) = CategoryName
+  names(CT) = CategoryName
+  names(PT) = CategoryName
+  names(SST) = CategoryName
+  names(BT) = CategoryName
+
+  # Combine all tables into one data frame
+  M = c()
+  M$Rank.Table = RT 
+  M$Var.Table = VT
+  M$Stability.Table = ST
+
+  # Average Stability
+  if(CategoryL > 1){
+    # Run statistics summary for all data
+    STable = SumStats(qPCRData,E) 
+    # Create AvgStability
+    OD = order(STable[6,]) # order the Average Deviations - lowest to highest
+    Gene = GeneSymbol[OD] # Create rank table with gene symboles
+    Stability = as.numeric(STable[6,OD])
+    AvgStability = cbind.data.frame(Gene,Stability,stringsAsFactors = F)
+    M$AvgStability = AvgStability
+  }
+
+  #Finish Creating data frame
+  M$SummeryStats.Table = SST
+  M$Cor.Table = CT
+  M$PVal.Table = PT
+  M$BestKeeper.Table = BT
 
 
   # Only add the target gene stuff if there are target genes. 
-  if(!is.null(TData)){
-    TGCT = cbind(TGCT,TFactorN)
-    M2$TG_Cor.Table = TGCT
+  if(!is.null(TargetData)){
+    names(TGCT) = CategoryName
+    names(TGPT) = CategoryName
+    names(TGSST) = CategoryName
+    M$TG.SummeryStats.Table = TGSST
+    M$TG.Cor.Table = TGCT
+    M$TG.PVal.Table = TGPT
  
     # return values if have Target Genes.
-    return(M2) 
+    return(M) 
 
   } else {
     # return these values if no Target Genes.
-    return(M2)
+    return(M)
   }
 
 }

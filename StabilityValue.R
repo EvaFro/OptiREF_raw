@@ -19,13 +19,13 @@ StabilityValue <-function(GeneSymbol,Q2ig_ng,dig) {
   ## Stability: Per Gene
   ######################################################################################
   # Matrix vals
-  FactorL = nrow(dig) # Number of rows aka # of Factors   
+  CategoryL = nrow(dig) # Number of rows aka # of Categorys   
   L = ncol(dig) # Number of col aka # of Genes
-  FactorName = rownames(Q2ig_ng) # Name of factors. 
+  CategoryName = rownames(Q2ig_ng) # Name of Categorys. 
   
   
   # Esitmate gamma^2 (Y2)
-    Y2 = sum(dig^2)/((FactorL-1)*(L-1)) - sum(Q2ig_ng)/(FactorL*L)  # Equation 1.8 in sumplemental material for Andersen et al.
+    Y2 = sum(dig^2)/((CategoryL-1)*(L-1)) - sum(Q2ig_ng)/(CategoryL*L)  # Equation 1.8 in sumplemental material for Andersen et al.
     if(Y2<0){Y2=0}
   
   ######################################################################################
@@ -39,29 +39,29 @@ StabilityValue <-function(GeneSymbol,Q2ig_ng,dig) {
   
   # Ultimate Rank Table for Stability
   OD = order(Pi)
-  Stability = round(Pi[OD],digits = 3)
+  Stability = round(Pi[OD],digits = 2)
   Gene = GeneSymbol[OD]
-  AvgStability = data.frame(cbind(Gene,Stability))
+  AvgStability = cbind.data.frame(Gene,Stability,stringsAsFactors = F)
   rownames(AvgStability) = c(1:L)
   
   
-  # Rank Table for Factors  
+  # Rank Table for Categorys  
   Pig = t(Pig) # Transpose Pig so matches other methods
   Rank.Table = Pig # Make a rank table 
   Q2ig_ng = t(Q2ig_ng)
   
   # Rank each stability measure of Pig per facor.
-  for(i in 1:FactorL){
+  for(i in 1:CategoryL){
     ODr = order(Pig[,i]) # Ranking order
     Rank.Table[,i] = GeneSymbol[ODr] # gene symbols ranked
     Pig[,i] = Pig[ODr,i] # gene stability ranked
     Q2ig_ng[,i] = Q2ig_ng[ODr,i] # gene stability ranked
   }
   
-  # Define genes vs factors
-  colnames(Pig) = FactorName
+  # Define genes vs Categorys
+  colnames(Pig) = CategoryName
   rownames(Pig) = c(1:L)
-  colnames(Rank.Table) = FactorName
+  colnames(Rank.Table) = CategoryName
   rownames(Rank.Table) = c(1:L)
   rownames(Q2ig_ng) = c(1:L)
   
@@ -70,7 +70,7 @@ StabilityValue <-function(GeneSymbol,Q2ig_ng,dig) {
   M3$Rank.Table = Rank.Table
   M3$Var.Table = Q2ig_ng
   M3$Stability.Table = Pig
-  M3$AvgStability.Table = AvgStability
+  M3$AvgStability = AvgStability
   
 
   

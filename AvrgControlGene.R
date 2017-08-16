@@ -12,15 +12,11 @@
 ##############################################
 ## The Code ##
 
-AvrgControlGene <-function(Factor,GeneSymbol,A=2,Q2ig_ng,dig,Y2,TopGenes=NULL) {
+AvrgControlGene <-function(Category,GeneSymbol,A=2,Q2ig_ng,dig,Y2,TopGenes=NULL) {
   
   # Matrix vals
-  n = length(Factor) # Number of rows aka # of Samples   
+  n = length(Category) # Number of rows aka # of Samples   
   L = ncol(dig) # Number of col aka # of Genes
-  
-  # Factor info
-  FactorNum = as.numeric(summary.factor(Factor)) # total number of samples for each factor
-  FactorL = length(FactorNum) # total number of factors for dataset
   
   ##############################################################
   # Warnings -  make sure that they have all the corect values
@@ -36,6 +32,7 @@ AvrgControlGene <-function(Factor,GeneSymbol,A=2,Q2ig_ng,dig,Y2,TopGenes=NULL) {
     stop("The number of genes in 'Set A' is to large must be lower then number of total genes +1.")
   }
   
+
   if(is.null(TopGenes)){
     TopGenes = c(1:L)
   }
@@ -43,6 +40,10 @@ AvrgControlGene <-function(Factor,GeneSymbol,A=2,Q2ig_ng,dig,Y2,TopGenes=NULL) {
   ##############################################################
   # Main Function 
   ##############################################################
+  
+  # Category info
+  CategoryNum = as.numeric(summary.factor(Category)) # total number of samples for each Category
+  CategoryL = length(CategoryNum) # total number of Categorys for dataset
   
   # Average Control Gene
   A = abs(A)
@@ -53,15 +54,17 @@ AvrgControlGene <-function(Factor,GeneSymbol,A=2,Q2ig_ng,dig,Y2,TopGenes=NULL) {
   SetA=combn(TopGenes, A) # find the combination of genes based on number in A
   LL = ncol(SetA)  # how many total combinations
   PA = c() # Set up blank vector for PA
+  Gene = c()
   
   for(i in 1:LL){      
       PAg = abs(apply(m[,SetA[,i]],1,sum)) + (sqrt(apply(s[,SetA[,i]],1,sum))/A) 
       PAg = round(mean(PAg), digits = 4) # Equation 1.10 in sumplemental material for Andersen et al.
-      PA = rbind(PA,c(GeneSymbol[SetA[,i]],PAg)) # Table of which genes and their Average Stability Value.
+      Gene = rbind.data.frame(Gene,GeneSymbol[SetA[,i]],stringsAsFactors = F)
+      PA = c(PA,PAg) # Table of which genes and their Average Stability Value.
   }
   
-  # Make PA into a data frame
-  PA = data.frame(PA) 
+  # # Make PA into a data frame
+  PA = cbind.data.frame(Gene,PA,stringsAsFactors = F) 
   
   # Lable Columns
   Gn = rep("Gene",A) # make a vector with the number of genes in A
@@ -71,6 +74,7 @@ AvrgControlGene <-function(Factor,GeneSymbol,A=2,Q2ig_ng,dig,Y2,TopGenes=NULL) {
   Gn = c(Gn,"AverageStability") # Add on the stability lable 
   colnames(PA) = Gn # add the column names to PA
   
+
    # return these values.
     return(PA)
 }

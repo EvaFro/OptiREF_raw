@@ -12,7 +12,7 @@
 ##############################################
 ## The Code ##
 
-AndersenF <- function(qPCRData,minREF=2,Factor=NULL,E=NULL,GeneSymbol=NULL){
+AndersenF <- function(qPCRData,minREF=2,Category=NULL,E=NULL){
 
   # Matrix vals
   n = nrow(qPCRData) # Number of rows = Samples    
@@ -31,17 +31,26 @@ AndersenF <- function(qPCRData,minREF=2,Factor=NULL,E=NULL,GeneSymbol=NULL){
   
 
   # Gene Symbols
-  # Make sure to lable your genes.  
-  if (is.null(GeneSymbol)) {
-    warning("No 'Gene Symbols' will defult to column names.")
-    GeneSymbol = colnames(qPCRData)
+  # Are there Gene Symbol names - collumn names. 
+  if (is.null(colnames(qPCRData))){ 
+    stop("'qPCRData' needs column names aka 'Gene Symbol' ")
   }
+  GeneSymbol = colnames(qPCRData)
+  
+  
+  # Category info
+  # If no Category Value - make all one Category on a gene by gene basis. 
+  if (is.null(Category)) {
+    warning("No 'Category' will only compare gene by gene. Note: will not contain Stability values. Data will be ranked by Var.Table Data. See help(AndersonF) for more informaion.")
+  }
+  
   
   ##############################################################
   # Main Function 
   ##############################################################
   # Transform data by using standard curve efficiency values defult ~100%
-  # qPCRData = StandCurv(qPCRData,E)
+  qPCRData = StandCurv(qPCRData,E)
+  
   #   
   # Log transform qPCRData
   qPCRData=log2(qPCRData)
@@ -52,21 +61,27 @@ AndersenF <- function(qPCRData,minREF=2,Factor=NULL,E=NULL,GeneSymbol=NULL){
 
 
   
-  if (is.null(Factor)) {
-    # Do the method for no Factor
-    M3 = OneFactorStability(qPCRData)
+  if (is.null(Category)) {
+    # Do the method for no Category
+    M = OneCategoryStability(qPCRData)
     
   }else{
     # Do the other methods for Facors
-    IntraVar = IntraFactorVar(qPCRData,Factor)
-    InterVar= InterFactorVar(qPCRData,Factor)
+    IntraVar = IntraCategoryVar(qPCRData,Category)
+    InterVar= InterCategoryVar(qPCRData,Category)
     Stability = StabilityValue(GeneSymbol,IntraVar$Q2ig_ng,InterVar$dig)
-    AverageStability = AvrgControlGene(Factor,GeneSymbol,minREF,IntraVar$Q2ig_ng,InterVar$dig,Stability$Y2,Stability$RankOrder[1:5])
-    M3 = Stability$M3
-    M3$AvrControl = AverageStability
+    TGL = length(Stability$RankOrder)
+    if(TGL<5){
+      TopGenes = Stability$RankOrder
+    }else{
+      TopGenes =Stability$RankOrder[1:5]
+    }
+    AvgControl = AvrgControlGene(Category,GeneSymbol,minREF,IntraVar$Q2ig_ng,InterVar$dig,Stability$Y2,TopGenes)
+    M = Stability$M
+    M$AvgControl = AvgControl
   }
   
 
     # return these values.
-    return(M3)
+    return(M)
 }

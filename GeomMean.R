@@ -25,7 +25,7 @@ GeomMean <- function (x){
     }
   
   # No NA values
-    if (any(is.na(X))) {
+    if (any(is.na(x))) {
       stop("'x' contains NA values")
     }
   
