@@ -1,4 +1,6 @@
 ##InterCategoryVar.R ##
+#' @export
+#' 
 
 ##############################################
 ## Author Information ##

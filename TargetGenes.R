@@ -1,5 +1,6 @@
 ## TargetGenes.R ##
-
+#' @export
+#' 
 ##############################################
 ## Author Information ##
 
@@ -12,7 +13,7 @@
 ##############################################
 ## The Code ##
 
-TargetGenes <-function (TargetData,BKIndex,E = NULL){
+TargetGenes <-function (TargetData,BKIndex,TargetE = NULL){
     
   # require(Hmisc) # To run the corilation values
   
@@ -26,13 +27,13 @@ TargetGenes <-function (TargetData,BKIndex,E = NULL){
   ##############################################################
   
   # Efficency Vals
-  if(!is.null(E)){
-    E = c(E,2)
+  if(!is.null(TargetE)){
+    TargetE = c(TargetE,2)
   }
   
-  if (is.null(E)){
-    warning("No 'E' values for each gene. Will set Defalt to 2 or Effiency = ~ 100%.")
-    E = rep(2,L)
+  if (is.null(TargetE)){
+    warning("No 'TargetE' values for each gene. Will set Defalt to 2 or Effiency = ~ 100%.")
+    TargetE = rep(2,L)
   }
   
   # Are there Gene Symbol names - collumn names. 
@@ -45,7 +46,7 @@ TargetGenes <-function (TargetData,BKIndex,E = NULL){
   ##############################################################
   
   # Calc the Descriptive Statistics of target genes
-  TD_SumStat = SumStats(TargetData,E)
+  TD_SumStat = SumStats(TargetData,TargetE)
   
   ParResult = rcorr(as.matrix(TargetData),type='pearson') # Corilation Result
   CorVal = round(ParResult$r,digits = 3) # Seporate out the corilation values - will use to do our comparisons.

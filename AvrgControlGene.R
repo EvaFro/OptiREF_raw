@@ -1,5 +1,6 @@
 ##AvrgControlGene.R ##
-
+#' @export
+#' 
 ##############################################
 ## Author Information ##
 

@@ -1,5 +1,6 @@
 ## CategoryF.R ##
-
+#' @export
+#' 
 ##############################################
 ## Author Information ##
 

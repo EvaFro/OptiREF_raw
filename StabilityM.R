@@ -1,4 +1,6 @@
 ## StabilityM.R ##
+#' @export
+#' 
 
 ##############################################
 ## Author Information ##

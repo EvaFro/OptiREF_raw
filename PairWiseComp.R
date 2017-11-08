@@ -1,5 +1,6 @@
 ## PairWiseComp.R ##
-
+#' @export
+#' 
 ##############################################
 ## Author Information ##
 

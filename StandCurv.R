@@ -1,5 +1,6 @@
 ## StandCurv.R ##
-
+#' @export
+#' 
 ##############################################
 ## Author Information ##
 

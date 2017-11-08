@@ -1,4 +1,6 @@
 ##OneCategoryStability.R ##
+#' @export
+#' 
 
 ##############################################
 ## Author Information ##

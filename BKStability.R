@@ -1,5 +1,6 @@
 ## BKStability.R ##
-
+#' @export
+#' 
 ##############################################
 ## Author Information ##
 

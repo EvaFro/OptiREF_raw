@@ -1,5 +1,6 @@
 ## BestKeeperIndex.R ##
-
+#' @export
+#' 
 ##############################################
 ## Author Information ##
 
@@ -13,7 +14,7 @@
 
 BestKeeperIndex <-function (qPCRData){
     
-    L = length(qPCRData[,1]) # length of the data set
+    L = nrow(qPCRData) # length of the data set
     BK = rep(0,L) # create the new BK vector
     for(i in 1:L){
       BK[i] = GeomMean(qPCRData[i,]) # caculate the geometric mean for each row

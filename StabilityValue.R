@@ -1,5 +1,6 @@
 ## StabilityValue.R ##
-
+#' @export
+#' 
 ##############################################
 ## Author Information ##
 
@@ -66,15 +67,15 @@ StabilityValue <-function(GeneSymbol,Q2ig_ng,dig) {
   rownames(Q2ig_ng) = c(1:L)
   
   # Combind Rank, Variance and Stability into one Table. 
-  M3 = c()
-  M3$Rank.Table = Rank.Table
-  M3$Var.Table = Q2ig_ng
-  M3$Stability.Table = Pig
-  M3$AvgStability = AvgStability
+  M = c()
+  M$Rank.Table = Rank.Table
+  M$Var.Table = round(Q2ig_ng,digits = 3)
+  M$Stability.Table = round(Pig,digits = 3)
+  M$AvgStability = AvgStability
   
 
   
   # return these values.
-    return(list("Pi"=Pi,"Y2"=Y2,"RankOrder"=OD,"M3"=M3))
+    return(list("Pi"=Pi,"Y2"=Y2,"RankOrder"=OD,"M"=M))
 
 }

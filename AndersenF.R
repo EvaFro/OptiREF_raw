@@ -1,5 +1,6 @@
 ##AndersenF.R ##
-
+#' @export
+#' 
 ############################################
 ## Author Information ##
 
@@ -25,7 +26,7 @@ AndersenF <- function(qPCRData,minREF=2,Category=NULL,E=NULL){
   
   # Efficency Vals
   if (is.null(E)){
-    warning("No 'E' values for each gene. Will set Defalt to 2 or Effiency = ~ 100%.")
+    warning("No 'E' values for each gene. Will set Defalt to 2 or Effiency = ~ 100%.\n")
     E = rep(2,L)
   }
   
@@ -33,7 +34,7 @@ AndersenF <- function(qPCRData,minREF=2,Category=NULL,E=NULL){
   # Gene Symbols
   # Are there Gene Symbol names - collumn names. 
   if (is.null(colnames(qPCRData))){ 
-    stop("'qPCRData' needs column names aka 'Gene Symbol' ")
+    stop("'qPCRData' needs column names aka 'Gene Symbol' \n")
   }
   GeneSymbol = colnames(qPCRData)
   
@@ -41,8 +42,20 @@ AndersenF <- function(qPCRData,minREF=2,Category=NULL,E=NULL){
   # Category info
   # If no Category Value - make all one Category on a gene by gene basis. 
   if (is.null(Category)) {
-    warning("No 'Category' will only compare gene by gene. Note: will not contain Stability values. Data will be ranked by Var.Table Data. See help(AndersonF) for more informaion.")
+    warning("'Category'== NULL will only compare gene by gene. Note: will not contain Stability values. Data will be ranked by Var.Table Data. See help(AndersonF) for more informaion.\n")
   }
+  
+  # does the min number of Reference genes >= 2, but < Total number of genes available. 
+  if (minREF >= L) {
+    warning("'minREF' must be smaller than 'ncol(qPCRData)', So 'minREF' will be set to default = 2 \n")
+    minREF <- 2
+  }
+  
+  if (minREF < 2) {
+    warning("'minREF' must be >= 2, So 'minREF' will be set to default = 2 \n")
+    minREF <- 2
+  }
+  
   
   
   ##############################################################
@@ -58,10 +71,8 @@ AndersenF <- function(qPCRData,minREF=2,Category=NULL,E=NULL){
   # Convert data into a matrix
   qPCRData=matrix(as.numeric(unlist(qPCRData)),n,L)
   colnames(qPCRData)=GeneSymbol
-
-
   
-  if (is.null(Category)) {
+  if(is.null(Category)){
     # Do the method for no Category
     M = OneCategoryStability(qPCRData)
     
@@ -71,11 +82,12 @@ AndersenF <- function(qPCRData,minREF=2,Category=NULL,E=NULL){
     InterVar= InterCategoryVar(qPCRData,Category)
     Stability = StabilityValue(GeneSymbol,IntraVar$Q2ig_ng,InterVar$dig)
     TGL = length(Stability$RankOrder)
-    if(TGL<5){
-      TopGenes = Stability$RankOrder
-    }else{
-      TopGenes =Stability$RankOrder[1:5]
-    }
+    
+      if(TGL<5){
+        TopGenes = Stability$RankOrder
+      }else{
+        TopGenes =Stability$RankOrder[1:5]
+      }
     AvgControl = AvrgControlGene(Category,GeneSymbol,minREF,IntraVar$Q2ig_ng,InterVar$dig,Stability$Y2,TopGenes)
     M = Stability$M
     M$AvgControl = AvgControl

@@ -1,5 +1,6 @@
 ##PfafflF.R ##
-
+#' @export
+#' 
 # Libraries needed to run this program
 # 1. Hmisc
 
@@ -30,7 +31,7 @@ PfafflF <-function (qPCRData,TargetData=NULL,minREF=2,Category=NULL,E=NULL,Targe
   
   # Efficency Vals
   if (is.null(E)){
-    warning("No 'E' values for each gene. Will set Defalt to 2 or Effiency = ~ 100%.")
+    warning("No 'E' values for each gene. Will set Defalt to 2 or Effiency = ~ 100%.\n")
     E = rep(2,L)
   }
   
@@ -38,7 +39,7 @@ PfafflF <-function (qPCRData,TargetData=NULL,minREF=2,Category=NULL,E=NULL,Targe
     m = nrow(TargetData) # Number of rows = samples target Genes
     K = ncol(TargetData) # Number of col = target gene
     if (is.null(TargetE)){
-      warning("No 'TargetE' values for each gene. Will set Defalt to 2 or Effiency = ~ 100%.")
+      warning("No 'TargetE' values for each gene. Will set Defalt to 2 or Effiency = ~ 100%.\n")
       TargetE = rep(2,(K+1))
     }
   }
@@ -46,14 +47,14 @@ PfafflF <-function (qPCRData,TargetData=NULL,minREF=2,Category=NULL,E=NULL,Targe
   # Category info
   # If no Category Value - make all one Category on a gene by gene basis. 
   if (is.null(Category)) {
-    warning("No 'Category' will only compare gene by gene.")
+    warning("'Category'== NULL will only compare gene by gene.\n")
     Category <- CategoryF("ByGene",n)
   }
   
   # Gene Symbols
   # Are there Gene Symbol names - collumn names. 
   if (is.null(colnames(qPCRData))){ 
-    stop("'qPCRData' needs column names aka 'Gene Symbol' ")
+    stop("'qPCRData' needs column names aka 'Gene Symbol' \n")
   }
   GeneSymbol = colnames(qPCRData)
   
@@ -64,8 +65,20 @@ PfafflF <-function (qPCRData,TargetData=NULL,minREF=2,Category=NULL,E=NULL,Targe
   
   #Check to see if have enough for the persons correlation
   if (min(CategoryNum)<5) {
-    stop("You need at least 5 samples per Category to run Category comparisons with the Pfaffl method.")
+    stop("You need at least 5 samples per Category to run Category comparisons with the Pfaffl method.\n")
   }
+  
+  # does the min number of Reference genes >= 2, but < Total number of genes available. 
+  if (minREF >= L) {
+    warning("'minREF' must be smaller than 'ncol(qPCRData)', So 'minREF' will be set to default = 2 \n")
+    minREF <- 2
+  }
+  
+  if (minREF < 2) {
+    warning("'minREF' must be >= 2, So 'minREF' will be set to default = 2 \n")
+    minREF <- 2
+  }
+  
   
 
   ##############################################################
@@ -97,7 +110,7 @@ PfafflF <-function (qPCRData,TargetData=NULL,minREF=2,Category=NULL,E=NULL,Targe
 
     # If data has target genes
     if(!is.null(TargetData)){
-      TGM = TargetGenes(TargetData[Category == CategoryName[i],],M$BestKeeper.Table$BestKeeper.Inx,E=TargetE)
+      TGM = TargetGenes(TargetData[Category == CategoryName[i],],M$BestKeeper.Table$BestKeeper.Inx,TargetE=TargetE)
       TGCT = c(TGCT,list(TGM$TG.Cor.Table))# store all MeanM values into one table 
       TGPT = c(TGPT,list(TGM$TG.PVal.Table))# store all MeanM values into one table 
       TGSST = c(TGSST,list(TGM$TG.SummeryStats.Table))

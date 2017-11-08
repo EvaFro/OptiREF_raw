@@ -1,5 +1,6 @@
 ##VandesompeleF.R ##
-
+#' @export
+#' 
 ##############################################
 ## Author Information ##
 
@@ -23,23 +24,35 @@ VandesompeleF <-  function (qPCRData,minREF=2,Category=NULL,E=NULL){
   
   # Efficency Vals
   if (is.null(E)){
-    warning("No 'E' values for each gene. Will set Defalt to 2 or Effiency = ~ 100%.")
+    warning("No 'E' values for each gene. Will set Defalt to 2 or Effiency = ~ 100%.\n")
     E = rep(2,L)
   }
 
   # Category info
   # If no Category Value - make all one Category on a gene by gene basis. 
   if (is.null(Category)) {
-    warning("No 'Category' will only compare gene by gene.")
+    warning("'Category'== NULL will only compare gene by gene.\n")
     Category <- CategoryF("ByGene",n)
   }
   
   # Gene Symbols
   # Are there Gene Symbol names - collumn names. 
   if (is.null(colnames(qPCRData))){ 
-    stop("'qPCRData' needs column names aka 'Gene Symbol' ")
+    stop("'qPCRData' needs column names aka 'Gene Symbol' \n")
   }
   GeneSymbol = colnames(qPCRData)
+  
+  # does the min number of Reference genes >= 2, but < Total number of genes available. 
+  if (minREF >= L) {
+    warning("'minREF' must be smaller than 'ncol(qPCRData)', So 'minREF' will be set to default = 2 \n")
+    minREF <- 2
+  }
+  
+  if (minREF < 2) {
+    warning("'minREF' must be >= 2, So 'minREF' will be set to default = 2 \n")
+    minREF <- 2
+  }
+  
     
   ##############################################################
   # Main Function 
@@ -80,9 +93,9 @@ VandesompeleF <-  function (qPCRData,minREF=2,Category=NULL,E=NULL){
   
   # Combine all tables into one data frame
   M = c()
-  M$Rank.Table = RT 
-  M$Var.Table = VT
-  M$Stability.Table = MT
+  M$Rank.Table = RT
+  M$Var.Table = round(VT,digits = 3)
+  M$Stability.Table = round(MT,digits = 3)
   
   if(CategoryL > 1){
     for(i in 1:length(E)){

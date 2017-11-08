@@ -1,5 +1,6 @@
 ## RelativeQuant.R ##
-
+#' @export
+#' 
 
 ##############################################
 ## Author Information ##
